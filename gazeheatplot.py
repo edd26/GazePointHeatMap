@@ -42,8 +42,8 @@ def draw_display(dispsize, imagefile=None):
         # width and height of the image
         w, h = len(img[0]), len(img)
         # x and y position of the image on the display
-        x = dispsize[0] / 2 - w / 2
-        y = dispsize[1] / 2 - h / 2
+        x = int(numpy.round(dispsize[0] / 2 - w / 2))
+        y = int(numpy.round(dispsize[1] / 2 - h / 2))
         # draw the image on the screen
         screen[y:y + h, x:x + w, :] += img
     # dots per inch
