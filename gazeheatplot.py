@@ -12,6 +12,8 @@ def draw_display(dispsize, imagefile=None):
 
     arguments
 
+    heatmap		    - raw heatmap created from the gaze data and display info
+
     dispsize		-	tuple or list indicating the size of the display,
                     e.g. (1024,768)
 
@@ -92,10 +94,10 @@ def gaussian(x, sx, y=None, sy=None):
 
     return M
 
-def draw_heatmap(gazepoints, dispsize, imagefile=None, alpha=0.5, savefilename=None, gaussianwh=200, gaussiansd=None):
-    """Draws a heatmap of the provided fixations, optionally drawn over an
-    image, and optionally allocating more weight to fixations with a higher
-    duration.
+
+def get_heatmap(gazepoints, dispsize, gaussianwh=200, gaussiansd=None):
+    """Creates a heatmap of the provided fixations, optionally allocating more
+    weight to fixations with a higher duration.
 
     arguments
 
@@ -106,26 +108,10 @@ def draw_heatmap(gazepoints, dispsize, imagefile=None, alpha=0.5, savefilename=N
 
     keyword arguments
 
-    imagefile		-	full path to an image file over which the heatmap
-                    is to be laid, or None for no image; NOTE: the image
-                    may be smaller than the display size, the function
-                    assumes that the image was presented at the centre of
-                    the display (default = None)
-    alpha		-	float between 0 and 1, indicating the transparancy of
-                    the heatmap, where 0 is completely transparant and 1
-                    is completely untransparant (default = 0.5)
-    savefilename	-	full path to the file in which the heatmap should be
-                    saved, or None to not save the file (default = None)
-
     returns
 
-    fig			-	a matplotlib.pyplot Figure instance, containing the
-                    heatmap
+    heatmap-	a matrix with the raw data for heatmap
     """
-
-    # IMAGE
-    fig, ax = draw_display(dispsize, imagefile=imagefile)
-
     # HEATMAP
     # Gaussian
     gwh = gaussianwh
@@ -169,6 +155,43 @@ def draw_heatmap(gazepoints, dispsize, imagefile=None, alpha=0.5, savefilename=N
     # remove zeros
     lowbound = numpy.mean(heatmap[heatmap > 0])
     heatmap[heatmap < lowbound] = numpy.NaN
+
+    return heatmap
+
+def draw_heatmap(heatmap, dispsize, imagefile=None, alpha=0.5, savefilename=None, ):
+    """Draws a heatmap of the provided fixations, optionally drawn over an
+    image, and optionally allocating more weight to fixations with a higher
+    duration.
+
+    arguments
+
+    gazepoints		-	a list of gazepoint tuples (x, y)
+    
+    dispsize		-	tuple or list indicating the size of the display,
+                    e.g. (1024,768)
+
+    keyword arguments
+
+    imagefile		-	full path to an image file over which the heatmap
+                    is to be laid, or None for no image; NOTE: the image
+                    may be smaller than the display size, the function
+                    assumes that the image was presented at the centre of
+                    the display (default = None)
+    alpha		-	float between 0 and 1, indicating the transparancy of
+                    the heatmap, where 0 is completely transparant and 1
+                    is completely untransparant (default = 0.5)
+    savefilename	-	full path to the file in which the heatmap should be
+                    saved, or None to not save the file (default = None)
+
+    returns
+
+    fig			-	a matplotlib.pyplot Figure instance, containing the
+                    heatmap
+    """
+
+    # IMAGE
+    fig, ax = draw_display(dispsize, imagefile=imagefile)
+
     # draw heatmap on top of image
     ax.imshow(heatmap, cmap='jet', alpha=alpha)
 
@@ -224,6 +247,7 @@ with open(input_path) as f:
 	else:
 		gaze_data =  list(map(lambda q: (int(q[0]), int(q[1]), int(q[2])), raw))
 		
-	draw_heatmap(gaze_data, (display_width, display_height), alpha=alpha, savefilename=output_name, imagefile=background_image, gaussianwh=ngaussian, gaussiansd=sd)
+	heatmap = get_heatmap(gaze_data, (display_width, display_height), gaussianwh=ngaussian, gaussiansd=sd)
+	draw_heatmap(heatmap , (display_width, display_height), imagefile=background_image,  alpha=alpha, savefilename=output_name)
 
    
