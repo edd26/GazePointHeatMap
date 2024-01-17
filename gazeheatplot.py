@@ -132,14 +132,14 @@ def draw_heatmap(gazepoints, dispsize, imagefile=None, alpha=0.5, savefilename=N
     gsdwh = gwh / 6 if (gaussiansd is None) else gaussiansd
     gaus = gaussian(gwh, gsdwh)
     # matrix of zeroes
-    strt = gwh / 2
-    heatmapsize = dispsize[1] + 2 * strt, dispsize[0] + 2 * strt
+    strt = int(numpy.round(gwh / 2))
+    heatmapsize = (int(dispsize[1] + 2 * strt), int(dispsize[0] + 2 * strt))
     heatmap = numpy.zeros(heatmapsize, dtype=float)
     # create heatmap
     for i in range(0, len(gazepoints)):
         # get x and y coordinates
-        x = strt + gazepoints[i][0] - int(gwh / 2)
-        y = strt + gazepoints[i][1] - int(gwh / 2)
+        x = int(strt + gazepoints[i][0] - int(gwh / 2))
+        y = int(strt + gazepoints[i][1] - int(gwh / 2))
         # correct Gaussian size if either coordinate falls outside of
         # display boundaries
         if (not 0 < x < dispsize[0]) or (not 0 < y < dispsize[1]):
