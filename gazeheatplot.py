@@ -165,7 +165,7 @@ def draw_heatmap(heatmap, dispsize, imagefile=None, alpha=0.5, savefilename=None
 
     arguments
 
-    gazepoints		-	a list of gazepoint tuples (x, y)
+    heatmap-	a matrix with the raw data for heatmap
     
     dispsize		-	tuple or list indicating the size of the display,
                     e.g. (1024,768)
@@ -204,6 +204,29 @@ def draw_heatmap(heatmap, dispsize, imagefile=None, alpha=0.5, savefilename=None
 
     return fig
 
+def export_heatmap_to_file(heatmap, output_heatmap):
+    """ Saves the heatmap as a file with a filename specified as
+    `output_heatmap`. File name should have the path and the extension with
+    which the file should be saved.
+
+    arguments
+
+    heatmap-	a matrix with the raw data for heatmap
+    
+    output_heatmap -	full path to the file to which the raw heatmap should
+                be exported
+
+    returns
+    Nothing
+
+    """
+    root, ext = os.path.splitext(output_heatmap)
+
+    if ext:
+        numpy.savetxt(output_heatmap,heatmap , delimiter=",")
+    else:
+        raise ValueError(f"{output_heatmap} does not have an extension.")
+
 
 ##################
 #     Parsing    #
@@ -218,7 +241,8 @@ parser.add_argument('display-height', type=int, help='an integer representing th
 
 #optional args
 parser.add_argument('-a', '--alpha', type=float, default='0.5', required=False, help='alpha for the gaze overlay')
-parser.add_argument('-o',  '--output-name', type=str, required=False, help='name for the output file')
+parser.add_argument('-o',  '--output-name', type=str, required=False, help='name for the output figure')
+parser.add_argument('-c',  '--output_heatmap', type=str, required=False, help='name for the output file with raw heatmap')
 parser.add_argument('-b',  '--background-image', type=str, default=None, required=False, help='path to the background image')
 
 #advanced optional args
@@ -233,6 +257,7 @@ display_width = args['display-width']
 display_height = args['display-height']
 alpha = args['alpha']
 output_name = args['output_name'] if args['output_name'] is not None else 'output'
+output_heatmap = args['output_heatmap'] if args['output_heatmap'] is not None else None
 background_image = args['background_image']
 ngaussian = args['n_gaussian_matrix']
 sd = args['standard_deviation']
@@ -248,6 +273,11 @@ with open(input_path) as f:
 		gaze_data =  list(map(lambda q: (int(q[0]), int(q[1]), int(q[2])), raw))
 		
 	heatmap = get_heatmap(gaze_data, (display_width, display_height), gaussianwh=ngaussian, gaussiansd=sd)
+
+	if output_heatmap is not None:
+	    export_heatmap_to_file(heatmap, output_heatmap)
+	    
+
 	draw_heatmap(heatmap , (display_width, display_height), imagefile=background_image,  alpha=alpha, savefilename=output_name)
 
    
